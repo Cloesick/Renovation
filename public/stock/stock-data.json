@@ -1,0 +1,281 @@
+[
+  {
+    "filename": "bohemian_bed_macramWallHanging_plants_rattan_neutralTones_blanket_pottedPlants_wovenBaskets_hangingLight.webp",
+    "originalName": "bohemian_bed_macramWallHanging_plants_rattan_neutralTones_blanket_pottedPlants_wovenBaskets_hangingLight.webp",
+    "description": "A cozy, bohemian-style bedroom with natural elements and neutral tones.",
+    "tokens": [
+      "bohemian",
+      "bed",
+      "macramWallHanging",
+      "plants",
+      "rattan",
+      "neutralTones",
+      "blanket",
+      "pottedPlants",
+      "wovenBaskets",
+      "hangingLight"
+    ]
+  },
+  {
+    "filename": "sofa_fireplace_naturalLight_lamp_rug_curtains_throwBlanket_wovenBasket_decorativeVases_neutralColors.webp",
+    "originalName": "beigeSofa_fireplace_floorLamp_wovenBasket_throwBlanket_neutralTones_curtains_woodenFloor_pottedPlant.webp",
+    "description": "A cozy living room with neutral tones, featuring a sofa, fireplace, and natural light.",
+    "tokens": [
+      "sofa",
+      "fireplace",
+      "naturalLight",
+      "lamp",
+      "rug",
+      "curtains",
+      "throwBlanket",
+      "wovenBasket",
+      "decorativeVases",
+      "neutralColors"
+    ]
+  },
+  {
+    "filename": "fireplace_armchair_bookshelves_rug_chandelier_curtains_painting_lamp_throwPillow_hardwoodFloor.webp",
+    "originalName": "fireplace_bookshelves_armchair_rug_chandelier_curtains_painting_woodPaneling_clock_cushions.webp",
+    "description": "A cozy, traditional living room with a fireplace, armchair, and bookshelves.",
+    "tokens": [
+      "fireplace",
+      "armchair",
+      "bookshelves",
+      "rug",
+      "chandelier",
+      "curtains",
+      "painting",
+      "lamp",
+      "throwPillow",
+      "hardwoodFloor"
+    ]
+  },
+  {
+    "filename": "freestandingTub_largeWindows_gardenView_darkMarbleFloor_modernDesign_towelRack_neutralTones_luxurious.webp",
+    "originalName": "freestandingBathtub_largeWindows_gardenView_marbleFlooring_minimalistDesign_neutralTones_towelRack_naturalLight.webp",
+    "description": "A modern bathroom with a freestanding tub and large windows overlooking a garden.",
+    "tokens": [
+      "freestandingTub",
+      "largeWindows",
+      "gardenView",
+      "darkMarbleFloor",
+      "modernDesign",
+      "towelRack",
+      "neutralTones",
+      "luxurious"
+    ]
+  },
+  {
+    "filename": "glassShower_roundMirror_vanity_patternedFloorTiles_whiteWalls_modernFaucet_toilet_window_showerhead_minimalistDesign.webp",
+    "originalName": "glassShower_roundMirror_vanity_patternedFloorTiles_whiteWalls_modernFaucet_toilet_window_showerhead_minimalistDesign.webp",
+    "description": "A modern bathroom with a glass shower enclosure and stylish flooring.",
+    "tokens": [
+      "glassShower",
+      "roundMirror",
+      "vanity",
+      "patternedFloorTiles",
+      "whiteWalls",
+      "modernFaucet",
+      "toilet",
+      "window",
+      "showerhead",
+      "minimalistDesign"
+    ]
+  },
+  {
+    "filename": "graySofa_indoorPlants_woodenFloor_neutralColors_modernDesign_coffeeTable_floorLamp_accentChair_areaRug_lightCurtains.webp",
+    "originalName": "graySofa_armchair_indoorPlants_woodenFloor_lightDecor_whiteWalls_sideTable_floorLamp_throwPillows_areaRug.webp",
+    "description": "A bright, modern living room with a gray sofa and plants.",
+    "tokens": [
+      "graySofa",
+      "indoorPlants",
+      "woodenFloor",
+      "neutralColors",
+      "modernDesign",
+      "coffeeTable",
+      "floorLamp",
+      "accentChair",
+      "areaRug",
+      "lightCurtains"
+    ]
+  },
+  {
+    "filename": "loft_industrial_leatherSofa_largeWindows_exposedBrick_coffeeTable_floorLamp_rug_pillow_modern.webp",
+    "originalName": "industrial_largeWindows_brickWalls_leatherSofa_woodenCoffeeTable_floorLamp_pillows_minimalist_rug_exposedCeiling.webp",
+    "description": "A stylish loft with industrial elements featuring a leather sofa and large windows.",
+    "tokens": [
+      "loft",
+      "industrial",
+      "leatherSofa",
+      "largeWindows",
+      "exposedBrick",
+      "coffeeTable",
+      "floorLamp",
+      "rug",
+      "pillow",
+      "modern"
+    ]
+  },
+  {
+    "filename": "leatherChairs_leatherSofa_woodenBeams_bookshelves_coffeeTable_tableLamp_largeWindows_curtains_areaRug_indoorPlants.webp",
+    "originalName": "leatherSofa_woodenBeams_bookshelf_coffeeTable_rug_armchairs_windows_lamp_curtains_decorativePlant.webp",
+    "description": "A cozy living room with leather seating and wooden accents.",
+    "tokens": [
+      "leatherChairs",
+      "leatherSofa",
+      "woodenBeams",
+      "bookshelves",
+      "coffeeTable",
+      "tableLamp",
+      "largeWindows",
+      "curtains",
+      "areaRug",
+      "indoorPlants"
+    ]
+  },
+  {
+    "filename": "glassShower_subwayTiles_woodenVanity_minimalistDesign_rainShowerHead_whiteTiles_bathroomDecor_naturalLight_modernDesign.webp",
+    "originalName": "minimalist_glassShower_whiteTiles_woodenVanity_modern_openShower_naturalLight_sink_subwayTiles_showerhead.webp",
+    "description": "A minimalist bathroom with a glass-enclosed shower and wooden vanity.",
+    "tokens": [
+      "glassShower",
+      "subwayTiles",
+      "woodenVanity",
+      "minimalistDesign",
+      "rainShowerHead",
+      "whiteTiles",
+      "bathroomDecor",
+      "naturalLight",
+      "modernDesign"
+    ]
+  },
+  {
+    "filename": "minimalist_whiteCabinetry_largeIsland_abstractArt_concreteFloor_naturalLight_recessedLighting_indoorPlants_sleekDesign_glassBacksplash.webp",
+    "originalName": "minimalist_kitchenIsland_abstractArt_whiteCabinets_concreteFloor_largeWindow_greenPlants_undercabinetLighting_monotoneDecor_sleekDesign.webp",
+    "description": "A modern minimalist kitchen with sleek white cabinetry and a large island.",
+    "tokens": [
+      "minimalist",
+      "whiteCabinetry",
+      "largeIsland",
+      "abstractArt",
+      "concreteFloor",
+      "naturalLight",
+      "recessedLighting",
+      "indoorPlants",
+      "sleekDesign",
+      "glassBacksplash"
+    ]
+  },
+  {
+    "filename": "minimalist_patio_whiteBench_cushions_archNiche_oliveTree_terracottaTiles_outdoorSeating.webp",
+    "originalName": "minimalist_outdoorSeating_neutralColors_archedNiche_cushions_pottedPlant_terracottaTiles_modernDesign.webp",
+    "description": "A minimalist patio with a built-in white bench, cushions, and a potted olive tree.",
+    "tokens": [
+      "minimalist",
+      "patio",
+      "whiteBench",
+      "cushions",
+      "archNiche",
+      "oliveTree",
+      "terracottaTiles",
+      "outdoorSeating"
+    ]
+  },
+  {
+    "filename": "minimalist_platformBed_neutralColors_hangingLights_woodenFurniture_vase_pillows_curtains_sideTables.webp",
+    "originalName": "minimalist_woodenBed_neutralColors_pendantLights_bedding_sideTables_curtains_vase_modernDesign.webp",
+    "description": "A minimalist bedroom with a wooden platform bed and neutral decor.",
+    "tokens": [
+      "minimalist",
+      "platformBed",
+      "neutralColors",
+      "hangingLights",
+      "woodenFurniture",
+      "vase",
+      "pillows",
+      "curtains",
+      "sideTables"
+    ]
+  },
+  {
+    "filename": "modern_bathroom_largeMirror_floatingVanity_wooden_ambientLighting_wallmountedFaucet_neutralTones_minimalist_window.webp",
+    "originalName": "modern_bathroom_largeMirror_floatingVanity_ambientLighting_neutralTones_minimalist_cleanDesign_window_plants.webp",
+    "description": "A modern bathroom with a large mirror, floating wooden vanity, and ambient lighting.",
+    "tokens": [
+      "modern",
+      "bathroom",
+      "largeMirror",
+      "floatingVanity",
+      "wooden",
+      "ambientLighting",
+      "wallmountedFaucet",
+      "neutralTones",
+      "minimalist",
+      "window"
+    ]
+  },
+  {
+    "filename": "blueWalls_diningTable_whiteChairs_pendantLight_woodenFloor_geometricRug_vaseDecor.webp",
+    "originalName": "modern_diningRoom_woodenTable_whiteChairs_blueAccentWall_pendantLight_geometricRug_minimalist_vases_naturalLight.webp",
+    "description": "A modern dining room with blue walls and minimalist furniture.",
+    "tokens": [
+      "blueWalls",
+      "diningTable",
+      "whiteChairs",
+      "pendantLight",
+      "woodenFloor",
+      "geometricRug",
+      "vaseDecor"
+    ]
+  },
+  {
+    "filename": "modern_livingRoom_beigeSofas_largeWindows_cityscapeView_coffeeTable_neutralTones_lamps_woodenCeiling_curtains.webp",
+    "originalName": "modern_livingRoom_largeWindows_sectionalSofa_coffeeTable_neutralColors_cityView_floorLamp_woodAccents.webp",
+    "description": "A modern living room with beige sofas and large windows overlooking a cityscape.",
+    "tokens": [
+      "modern",
+      "livingRoom",
+      "beigeSofas",
+      "largeWindows",
+      "cityscapeView",
+      "coffeeTable",
+      "neutralTones",
+      "lamps",
+      "woodenCeiling",
+      "curtains"
+    ]
+  },
+  {
+    "filename": "woodenBeams_rustic_kitchenIsland_copperPans_blueCabinets_hangingLights_farmhouseSink_hardwoodFloor_vintageStyle_naturalLight.webp",
+    "originalName": "woodenBeams_rustic_kitchenIsland_copperPans_blueCabinets_hangingLights_farmhouseSink_hardwoodFloor_vintageStyle_naturalLight.webp",
+    "description": "A rustic kitchen with exposed wooden beams and a central island.",
+    "tokens": [
+      "woodenBeams",
+      "rustic",
+      "kitchenIsland",
+      "copperPans",
+      "blueCabinets",
+      "hangingLights",
+      "farmhouseSink",
+      "hardwoodFloor",
+      "vintageStyle",
+      "naturalLight"
+    ]
+  },
+  {
+    "filename": "whiteSofa_woodenCoffeeTable_floorLamps_shiplapWalls_wovenBaskets_neutralTones_greenPlant_cozySeating_naturalLight.webp",
+    "originalName": "whiteSofa_woodCoffeeTable_floorLamps_pottedPlant_shiplapWalls_wovenBaskets_neutralCushions_naturalLight_areaRug.webp",
+    "description": "A cozy, minimalist living room with white walls and natural wood accents.",
+    "tokens": [
+      "whiteSofa",
+      "woodenCoffeeTable",
+      "floorLamps",
+      "shiplapWalls",
+      "wovenBaskets",
+      "neutralTones",
+      "greenPlant",
+      "cozySeating",
+      "naturalLight"
+    ]
+  }
+]

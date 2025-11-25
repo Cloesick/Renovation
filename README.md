@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a [Next.js](https://nextjs.org) app bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
-First, run the development server:
+From the `renovation-app` folder run the development server with **npm**:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file in the `renovation-app` folder with your keys:
 
-## Learn More
+```ini
+OPENAI_API_KEY=sk-...your-openai-key...
+GEMINI_API_KEY=...your-gemini-key...
+```
 
-To learn more about Next.js, take a look at the following resources:
+Restart the dev server after changing env variables.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Wizard flow
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The `/wizard` page guides the user through a 4‑step flow:
 
-## Deploy on Vercel
+- **Step 1 – Room selection**: choose which room to renovate (living room, kitchen, bathroom, ...).
+- **Step 2 – Style selection**: choose the desired interior style.
+- **Step 3 – AI inspiration images**:
+  - Calls the backend `/api/generate` route to create a few inspirational views.
+  - Shows a short explanation and a "Continue to details" button above the generated images.
+  - Only moves to step 4 when the user explicitly confirms.
+- **Step 4 – Contact & email draft**:
+  - Collects name, email, approximate m², and optional notes.
+  - Lets the user upload room photos, converts them to WebP client‑side, and offers download links.
+  - Generates an editable email draft addressed to `info@costadelsolservices.com` (with `nicolas.cloet@gmail.com` as an optional CC in the text).
+  - The user copies the draft into their own email client; **no automatic sending** is performed.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+All wizard state is kept in the browser (sessionStorage) only; no persistent backend storage is used.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Image generation API
+
+The wizard calls a backend API to generate images based on the selected room and style:
+
+- **Endpoint**: `POST /api/generate`
+- **Provider**: OpenAI Images `gpt-image-1`.
+- **Request**:
+  - Calls `https://api.openai.com/v1/images/generations` with `model: "gpt-image-1"`, `n: 3`, and `size: "1024x1024"`.
+  - Builds a simple prompt describing a photorealistic interior for the chosen room and style.
+- **Response handling**:
+  - Supports both `data[].url` and `data[].b64_json` from OpenAI.
+  - `url` values are passed through directly; `b64_json` values are wrapped as `data:image/png;base64,...`.
+  - Returns `{ images: string[] }` to the frontend.
+  - If no usable images are returned, the route responds with `500` and `{ error: "Image generation returned no images" }` so the UI can show a clear error.
+
+Make sure your OpenAI account is active, billed, and allowed to use `gpt-image-1`, and that `OPENAI_API_KEY` in `.env.local` matches a key that can successfully call the Images API.
