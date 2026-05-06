@@ -44,12 +44,122 @@ function buildPrompt(room: string, style: string): string {
   );
 }
 
+function buildFloorPrompt(room: string, style: string): string {
+  const roomName =
+    room === "kitchen" ? "kitchen" : room === "bathroom" ? "bathroom" : "living room";
+
+  const base = STYLE_PROMPTS[style] ??
+    "A realistic [ROOM] interior, thoughtfully designed, photorealistic, wide-angle.";
+
+  const withRoom = base.replace("[ROOM]", roomName);
+
+  return (
+    withRoom +
+    " Architectural floor view from above of the [ROOM] layout, interior architect point of view, clean lines, high-resolution, balanced proportions, minimal clutter, top-down composition."
+  ).replace("[ROOM]", roomName);
+}
+
+async function makeOpenAIRequest(apiKey: string, promptText: string, n: number) {
+  const resp = await fetch("https://api.openai.com/v1/images/generations", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-image-1",
+      prompt: promptText,
+      n,
+      size: "1024x1024",
+    }),
+  });
+
+  if (!resp.ok) {
+    const errorText = await resp.text();
+    console.error("OpenAI image generation failed", errorText);
+    return { ok: false as const, images: [] as string[] };
+  }
+
+  const raw = await resp.json();
+  console.log("OpenAI image raw response", raw);
+  const data = raw as { data?: { url?: string; b64_json?: string }[] };
+  const imgs = (data.data ?? [])
+    .map((item) => {
+      if (typeof item.url === "string") {
+        return item.url;
+      }
+      if (typeof item.b64_json === "string") {
+        return `data:image/png;base64,${item.b64_json}`;
+      }
+      return undefined;
+    })
+    .filter((u): u is string => typeof u === "string");
+
+  return { ok: true as const, images: imgs };
+}
+
+async function makeGeminiRequest(geminiKey: string, promptText: string, n: number) {
+  try {
+    const resp = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": geminiKey,
+        },
+        body: JSON.stringify({
+          instances: [
+            {
+              prompt: promptText,
+            },
+          ],
+          parameters: {
+            sampleCount: n,
+          },
+        }),
+      }
+    );
+
+    if (!resp.ok) {
+      const errorText = await resp.text();
+      console.error("Gemini image generation failed", errorText);
+      return { ok: false as const, images: [] as string[] };
+    }
+
+    const raw = await resp.json();
+    console.log("Gemini image raw response", raw);
+
+    // The Imagen REST API returns an array of predictions with base64-encoded bytes.
+    // See https://ai.google.dev/gemini-api/docs/imagen for the exact schema.
+    const data = raw as {
+      predictions?: { bytesBase64Encoded?: string }[];
+    };
+
+    const imgs = (data.predictions ?? [])
+      .map((item) => {
+        if (typeof item.bytesBase64Encoded === "string") {
+          return `data:image/png;base64,${item.bytesBase64Encoded}`;
+        }
+        return undefined;
+      })
+      .filter((u): u is string => typeof u === "string");
+
+    return { ok: true as const, images: imgs };
+  } catch (err) {
+    console.error("Error calling Gemini image API", err);
+    return { ok: false as const, images: [] as string[] };
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
+    const geminiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey && !geminiKey) {
       return NextResponse.json(
-        { error: "OPENAI_API_KEY is not configured." },
+        { error: "Neither OPENAI_API_KEY nor GEMINI_API_KEY is configured." },
         { status: 500 }
       );
     }
@@ -58,59 +168,32 @@ export async function POST(req: NextRequest) {
     const room = (body.room as string | undefined) ?? "living-room";
     const style = (body.style as string | undefined) ?? "modern";
 
-    const prompt = buildPrompt(room, style);
+    const roomPrompt = buildPrompt(room, style);
+    const floorPrompt = buildFloorPrompt(room, style);
 
-    const response = await fetch("https://api.openai.com/v1/images/generations", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-image-1",
-        prompt,
-        n: 3,
-        size: "1024x1024",
-      }),
-    });
+    let images: string[] = [];
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenAI image generation failed", errorText);
+    if (apiKey) {
+      const first = await makeOpenAIRequest(apiKey, roomPrompt, 2);
+      const second = await makeOpenAIRequest(apiKey, floorPrompt, 1);
+      images = [...first.images, ...second.images];
+    }
+
+    // Fallback to Gemini if OpenAI produced no images and Gemini is configured.
+    if (images.length === 0 && geminiKey) {
+      const firstGemini = await makeGeminiRequest(geminiKey, roomPrompt, 2);
+      const secondGemini = await makeGeminiRequest(geminiKey, floorPrompt, 1);
+      images = [...firstGemini.images, ...secondGemini.images];
+    }
+
+    if (images.length === 0) {
       return NextResponse.json(
-        { error: "Image generation failed" },
+        { error: "Image generation returned no images" },
         { status: 500 }
       );
     }
 
-const raw = await response.json();
-console.log("OpenAI image raw response", raw);
-
-const data = raw as {
-  data?: { url?: string; b64_json?: string }[];
-};
-
-const images = (data.data ?? [])
-  .map((item) => {
-    if (typeof item.url === "string") {
-      return item.url;
-    }
-    if (typeof item.b64_json === "string") {
-      return `data:image/png;base64,${item.b64_json}`;
-    }
-    return undefined;
-  })
-  .filter((u): u is string => typeof u === "string");
-
-if (images.length === 0) {
-  console.error("OpenAI returned no images", raw);
-  return NextResponse.json(
-    { error: "Image generation returned no images" },
-    { status: 500 }
-  );
-}
-
-return NextResponse.json({ images });
+    return NextResponse.json({ images });
   } catch (error) {
     console.error("Error in /api/generate", error);
     return NextResponse.json({ error: "Unexpected error" }, { status: 500 });

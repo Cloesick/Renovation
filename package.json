@@ -10,7 +10,9 @@
     "stage": "git add .",
     "commit": "git commit -m",
     "deploy": "git push",
-    "convert:stock": "ts-node scripts/describe-and-convert-stock.ts"
+    "convert:stock": "ts-node scripts/describe-and-convert-stock.ts",
+    "test:learn": "cypress run --reporter ./cypress/plugins/windsurf-reporter.js",
+    "test:analyze": "node scripts/analyze-test-results.cjs"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
