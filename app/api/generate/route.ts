@@ -57,8 +57,45 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const room = (body.room as string | undefined) ?? "living-room";
     const style = (body.style as string | undefined) ?? "modern";
+    const squareMeters = (body.squareMeters as string | undefined) ?? "";
+    const lengthMeters = (body.lengthMeters as string | undefined) ?? "";
+    const widthMeters = (body.widthMeters as string | undefined) ?? "";
 
-    const prompt = buildPrompt(room, style);
+    let prompt = buildPrompt(room, style);
+
+    // Derive an approximate numeric area and size category
+    const parseNumber = (value: string) => {
+      if (!value) return NaN;
+      const n = parseFloat(value.replace(",", "."));
+      return Number.isFinite(n) && n > 0 ? n : NaN;
+    };
+
+    const length = parseNumber(lengthMeters);
+    const width = parseNumber(widthMeters);
+    let areaFromDims = NaN;
+    if (Number.isFinite(length) && Number.isFinite(width)) {
+      areaFromDims = length * width;
+    }
+
+    let area = parseNumber(squareMeters);
+    if (Number.isNaN(area) && Number.isFinite(areaFromDims)) {
+      area = areaFromDims;
+    }
+
+    if (Number.isFinite(area)) {
+      let sizeLabel = "medium-sized";
+      if (area < 12) sizeLabel = "small";
+      else if (area > 30) sizeLabel = "large";
+
+      const roundedArea = Math.round(area);
+      prompt += ` The room is ${sizeLabel}, about ${roundedArea} square meters in floor area.`;
+
+      if (Number.isFinite(length) && Number.isFinite(width)) {
+        const roundedLength = Math.round(length * 10) / 10;
+        const roundedWidth = Math.round(width * 10) / 10;
+        prompt += ` Approximate dimensions: ${roundedLength} m by ${roundedWidth} m.`;
+      }
+    }
 
     const response = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",

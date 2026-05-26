@@ -68,7 +68,7 @@ async function describeAndConvert() {
     const ext = path.extname(file).toLowerCase();
     
     // FIX: Allow .webp now so we can re-process existing files
-    if (['.jpg', '.jpeg', '.png', '.webp'].includes(ext) === false) {
+    if (['.jpg', '.jpeg', '.webp', '.webp'].includes(ext) === false) {
       continue;
     }
 

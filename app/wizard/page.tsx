@@ -10,10 +10,26 @@ const rooms = [
 ];
 
 const budgetRanges = [
-  { id: "low", label: "Under  2.500", description: "Smaller updates: paint, textiles, a few pieces of furniture." },
-  { id: "medium", label: " 2.500  7.500", description: "Balanced makeover: several furniture pieces and decor." },
-  { id: "high", label: " 7.500  15.000", description: "Larger redesign with more furniture and light construction." },
-  { id: "premium", label: "Over  15.000", description: "High-end makeover, custom work, and premium finishes." },
+  {
+    id: "low",
+    label: "Under €2,500",
+    description: "Smaller updates: paint, textiles, a few pieces of furniture.",
+  },
+  {
+    id: "medium",
+    label: "€2,500–€7,500",
+    description: "Balanced makeover: several furniture pieces and decor.",
+  },
+  {
+    id: "high",
+    label: "€7,500–€15,000",
+    description: "Larger redesign with more furniture and light construction.",
+  },
+  {
+    id: "premium",
+    label: "Over €15,000",
+    description: "High-end makeover, custom work, and premium finishes.",
+  },
 ];
 
 const styles = [
@@ -119,11 +135,16 @@ export default function WizardPage() {
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [selectedBudget, setSelectedBudget] = useState<string | null>(null);
   const [squareMeters, setSquareMeters] = useState<string>("");
+  const [lengthMeters, setLengthMeters] = useState<string>("");
+  const [widthMeters, setWidthMeters] = useState<string>("");
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [userName, setUserName] = useState<string>("");
   const [userEmail, setUserEmail] = useState<string>("");
   const [userNotes, setUserNotes] = useState<string>("");
   const [emailDraft, setEmailDraft] = useState<string>("");
+  const [emailSending, setEmailSending] = useState<boolean>(false);
+  const [emailStatus, setEmailStatus] = useState<string | null>(null);
+  const [emailCopyStatus, setEmailCopyStatus] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [convertedImages, setConvertedImages] = useState<{ name: string; url: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -139,7 +160,12 @@ export default function WizardPage() {
     setUserEmail("");
     setUserNotes("");
     setEmailDraft("");
+    setEmailSending(false);
+    setEmailStatus(null);
+    setEmailCopyStatus(null);
     setSquareMeters("");
+    setLengthMeters("");
+    setWidthMeters("");
     setUploadedFiles([]);
     setConvertedImages([]);
     setImages([]);
@@ -209,6 +235,33 @@ export default function WizardPage() {
     window.sessionStorage.setItem("renovation-wizard", JSON.stringify(data));
   }, [selectedRoom, selectedStyle, selectedBudget, userName, userEmail, userNotes, squareMeters, step]);
 
+  // Keep square meters in sync with length and width when both are provided
+  useEffect(() => {
+    const length = parseFloat(lengthMeters.replace(",", "."));
+    const width = parseFloat(widthMeters.replace(",", "."));
+    if (!isFinite(length) || !isFinite(width) || length <= 0 || width <= 0) {
+      return;
+    }
+    const area = Math.round(length * width);
+    const next = String(area);
+    if (squareMeters !== next) {
+      setSquareMeters(next);
+    }
+  }, [lengthMeters, widthMeters, squareMeters]);
+
+  const computedAreaLabel = useMemo(() => {
+    if (squareMeters) {
+      return `${squareMeters} m²`;
+    }
+    const length = parseFloat(lengthMeters.replace(",", "."));
+    const width = parseFloat(widthMeters.replace(",", "."));
+    if (!isFinite(length) || !isFinite(width) || length <= 0 || width <= 0) {
+      return "not provided";
+    }
+    const area = Math.round(length * width);
+    return `${area} m² (approx.)`;
+  }, [squareMeters, lengthMeters, widthMeters]);
+
   const handleFilesSelected = async (files: FileList | null) => {
     if (!files || files.length === 0) {
       setUploadedFiles([]);
@@ -255,7 +308,7 @@ export default function WizardPage() {
   }, [selectedRoom]);
 
   useEffect(() => {
-    if (!isLoading || step !== 3) return;
+    if (!isLoading || step !== 4) return;
     if (!activeStockImages || activeStockImages.length === 0) return;
 
     const id = window.setInterval(() => {
@@ -267,9 +320,9 @@ export default function WizardPage() {
     };
   }, [isLoading, step, activeStockImages]);
 
-  // Call backend to generate images when we arrive at step 3 with valid choices
+  // Call backend to generate images when we arrive at step 4 with valid choices
   useEffect(() => {
-    if (step !== 3) return;
+    if (step !== 4) return;
     if (!selectedRoom || !selectedStyle) return;
 
     let cancelled = false;
@@ -386,68 +439,209 @@ export default function WizardPage() {
 
         {step === 3 && (
           <section className="flex flex-1 flex-col gap-6">
-            <div className="space-y-2">
-              <h1 className="text-2xl font-semibold">Here is what could inspire you.</h1>
-              <p className="text-sm text-zinc-600">
-                A visual idea of your {selectedRoom?.replace("-", " ") ?? "room"} in
-                {" "}
-                <span className="font-medium">
-                  {styles.find((s) => s.id === selectedStyle)?.label ?? "your chosen style"}
-                </span>
-                .
-              </p>
-            </div>
-
-            {isLoading && (
-              <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-4 text-sm text-zinc-500">
-                Creating a few inspirational views for your space	this may take a few seconds...
-              </div>
-            )}
-
-            {!isLoading && error && (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                {error}
-              </div>
-            )}
-
-            {!isLoading && !error && images.length > 0 && (
-              <>
-                <div className="mt-1 rounded-2xl border border-zinc-200 bg-white p-3 text-xs text-zinc-700">
-                  <p className="mb-2">
-                    Review these suggestions. If they look reasonable as a starting point, continue to the
-                    final step to share your details so we can follow up.
-                  </p>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setStep(4)}
-                      className="inline-flex items-center justify-center rounded-full bg-zinc-900 px-5 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-black"
-                    >
-                      Continue to details
-                    </button>
-                  </div>
+            <div className="flex gap-3">
+              <div className="flex-1 space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-zinc-600">Name</label>
+                  <input
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/60"
+                    placeholder="Your full name"
+                  />
                 </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {images.map((src) => (
-                    <div
-                      key={src}
-                      className="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100"
-                    >
-                      <img
-                        src={src}
-                        alt="AI generated interior suggestion"
-                        className="h-full w-full object-cover"
+              <div>
+                <label className="block text-xs font-medium text-zinc-600">Email</label>
+                <input
+                  type="email"
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/60"
+                  placeholder="you@example.com"
+                />
+              </div>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-600">
+                    Approximate area to renovate (m²)
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={1000}
+                    value={squareMeters}
+                    onChange={(e) => setSquareMeters(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/60"
+                    placeholder="e.g. 20"
+                  />
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    <div>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={lengthMeters}
+                        onChange={(e) => setLengthMeters(e.target.value)}
+                        className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/60"
+                        placeholder="Length (m)"
                       />
                     </div>
-                  ))}
+                    <div>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={widthMeters}
+                        onChange={(e) => setWidthMeters(e.target.value)}
+                        className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/60"
+                        placeholder="Width (m)"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-1 text-[11px] text-zinc-600">
+                    Approximate area: <span className="font-medium">{computedAreaLabel}</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-zinc-500">
+                    You can either type the total area directly, or estimate it from length × width. A rough
+                    estimate is enough; you can refine it together later.
+                  </p>
                 </div>
-              </>
-            )}
+              <div>
+                <label className="block text-xs font-medium text-zinc-600">Extra notes (optional)</label>
+                <textarea
+                  value={userNotes}
+                  onChange={(e) => setUserNotes(e.target.value)}
+                  rows={3}
+                  className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/60"
+                  placeholder="Anything else we should know about your project?"
+                />
+              </div>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-600">
+                    Room photos (optional)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => handleFilesSelected(e.target.files)}
+                    className="mt-1 block w-full text-xs text-zinc-600 file:mr-3 file:rounded-full file:border-0 file:bg-zinc-900 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white file:hover:bg-black"
+                  />
+                  <p className="mt-1 text-[11px] text-zinc-500">
+                    You can select up to 5 photos from different angles. They will be converted to
+                    .webp for smaller email attachments.
+                  </p>
+                </div>
+              </div>
 
-            {!isLoading && !error && images.length === 0 && (
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 text-xs text-zinc-600">
-                No images yet. Try going back, adjusting your choices, and continuing again.
+              <div className="flex w-32 flex-col">
+                <button
+                  type="button"
+                  disabled={
+                    !userName ||
+                    !userEmail ||
+                    !selectedBudget ||
+                    !computedAreaLabel ||
+                    computedAreaLabel === "not provided"
+                  }
+                  onClick={() => {
+                    if (
+                      !userName ||
+                      !userEmail ||
+                      !selectedBudget ||
+                      !computedAreaLabel ||
+                      computedAreaLabel === "not provided"
+                    ) {
+                      return;
+                    }
+                    setStep(4);
+                  }}
+                  className="flex h-full min-h-32 flex-1 items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-medium text-white shadow-sm transition enabled:hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300"
+                >
+                  Generate
+                  <br />
+                  images
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2 rounded-2xl border border-zinc-200 bg-white p-3">
+              <div className="text-sm font-semibold text-zinc-800">What budget range are you considering?</div>
+              <p className="text-[11px] text-zinc-500">
+                This doesn&apos;t lock you into anything̦—it just helps us suggest realistic options.
+              </p>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                {budgetRanges.map((range) => (
+                  <button
+                    key={range.id}
+                    type="button"
+                    onClick={() => setSelectedBudget(range.id)}
+                    className={`w-full rounded-2xl border px-3 py-2 text-left text-xs transition focus:outline-none focus:ring-2 focus:ring-black/60 ${
+                      selectedBudget === range.id
+                        ? "border-black bg-black text-white"
+                        : "border-zinc-200 bg-white hover:border-black/60"
+                    }`}
+                  >
+                    <div className="font-semibold">{range.label}</div>
+                    <div
+                      className={`mt-1 ${
+                        selectedBudget === range.id ? "text-zinc-100" : "text-zinc-500"
+                      }`}
+                    >
+                      {range.description}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-600">
+              <div className="font-medium text-zinc-700">Quick summary</div>
+              <ul className="space-y-1">
+                <li>
+                  <span className="font-medium">Room:</span>{" "}
+                  {selectedRoom?.replace("-", " ") ?? "not selected"}
+                </li>
+                <li>
+                  <span className="font-medium">Style:</span>{" "}
+                  {styles.find((s) => s.id === selectedStyle)?.label ?? "not selected"}
+                </li>
+                <li>
+                  <span className="font-medium">Budget:</span>{" "}
+                  {selectedBudget
+                    ? budgetRanges.find((b) => b.id === selectedBudget)?.label
+                    : "not selected"}
+                </li>
+                <li>
+                  <span className="font-medium">Approx. area:</span>{" "}
+                  {computedAreaLabel}
+                </li>
+                <li>
+                  <span className="font-medium">Photos selected:</span>{" "}
+                  {uploadedFiles.length > 0 ? `${uploadedFiles.length} file(s)` : "none"}
+                </li>
+              </ul>
+            </div>
+
+            {convertedImages.length > 0 && (
+              <div className="space-y-2 rounded-2xl border border-zinc-200 bg-white p-3 text-xs text-zinc-600">
+                <div className="font-medium text-zinc-700">Converted .webp downloads</div>
+                <p className="text-[11px] text-zinc-500">
+                  Download these optimized .webp versions and attach them to your email.
+                </p>
+                <ul className="space-y-1">
+                  {convertedImages.map((img) => (
+                    <li key={img.url}>
+                      <a
+                        href={img.url}
+                        download={img.name}
+                        className="text-xs font-medium text-zinc-700 underline-offset-2 hover:text-zinc-900 hover:underline"
+                      >
+                        {img.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </section>
@@ -510,147 +704,53 @@ export default function WizardPage() {
         {step === 4 && (
           <section className="flex flex-1 flex-col gap-6">
             <div className="space-y-2">
-              <h1 className="text-2xl font-semibold">Share your details to get a follow-up.</h1>
+              <h1 className="text-2xl font-semibold">Here is what could inspire you.</h1>
               <p className="text-sm text-zinc-600">
-                We will prepare a draft email summarizing your room, style, and budget for
-                info@costadelsolservices.es. You can review and adjust it before anything is sent.
+                A visual idea of your {selectedRoom?.replace("-", " ") ?? "room"} in
+                {" "}
+                <span className="font-medium">
+                  {styles.find((s) => s.id === selectedStyle)?.label ?? "your chosen style"}
+                </span>
+                .
               </p>
             </div>
 
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-zinc-600">Name</label>
-                <input
-                  type="text"
-                  value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/60"
-                  placeholder="Your full name"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-zinc-600">Email</label>
-                <input
-                  type="email"
-                  value={userEmail}
-                  onChange={(e) => setUserEmail(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/60"
-                  placeholder="you@example.com"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-zinc-600">
-                  Approximate area to renovate (m²)
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  max={1000}
-                  value={squareMeters}
-                  onChange={(e) => setSquareMeters(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/60"
-                  placeholder="e.g. 20"
-                />
-                <p className="mt-1 text-[11px] text-zinc-500">
-                  A rough estimate is enough; you can refine it together later.
-                </p>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-zinc-600">Extra notes (optional)</label>
-                <textarea
-                  value={userNotes}
-                  onChange={(e) => setUserNotes(e.target.value)}
-                  rows={3}
-                  className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/60"
-                  placeholder="Anything else we should know about your project?"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-zinc-600">
-                  Room photos (optional)
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => handleFilesSelected(e.target.files)}
-                  className="mt-1 block w-full text-xs text-zinc-600 file:mr-3 file:rounded-full file:border-0 file:bg-zinc-900 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white file:hover:bg-black"
-                />
-                <p className="mt-1 text-[11px] text-zinc-500">
-                  You can select up to 5 photos from different angles. They will be converted to
-                  .webp for smaller email attachments.
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-600">
-              <div className="font-medium text-zinc-700">Quick summary</div>
-              <ul className="space-y-1">
-                <li>
-                  <span className="font-medium">Room:</span>{" "}
-                  {selectedRoom?.replace("-", " ") ?? "not selected"}
-                </li>
-                <li>
-                  <span className="font-medium">Style:</span>{" "}
-                  {styles.find((s) => s.id === selectedStyle)?.label ?? "not selected"}
-                </li>
-                <li>
-                  <span className="font-medium">Budget:</span>{" "}
-                  {selectedBudget
-                    ? budgetRanges.find((b) => b.id === selectedBudget)?.label
-                    : "not selected"}
-                </li>
-                <li>
-                  <span className="font-medium">Approx. area:</span>{" "}
-                  {squareMeters ? `${squareMeters} m²` : "not provided"}
-                </li>
-                <li>
-                  <span className="font-medium">Photos selected:</span>{" "}
-                  {uploadedFiles.length > 0 ? `${uploadedFiles.length} file(s)` : "none"}
-                </li>
-              </ul>
-            </div>
-
-            {convertedImages.length > 0 && (
-              <div className="space-y-2 rounded-2xl border border-zinc-200 bg-white p-3 text-xs text-zinc-600">
-                <div className="font-medium text-zinc-700">Converted .webp downloads</div>
-                <p className="text-[11px] text-zinc-500">
-                  Download these optimized .webp versions and attach them to your email.
-                </p>
-                <ul className="space-y-1">
-                  {convertedImages.map((img) => (
-                    <li key={img.url}>
-                      <a
-                        href={img.url}
-                        download={img.name}
-                        className="text-xs font-medium text-zinc-700 underline-offset-2 hover:text-zinc-900 hover:underline"
-                      >
-                        {img.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+            {isLoading && (
+              <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-4 text-sm text-zinc-500">
+                Creating a few inspirational views for your space	this may take a few seconds...
               </div>
             )}
 
-            <div className="space-y-3">
-              <button
-                type="button"
-                disabled={!userName || !userEmail}
-                onClick={() => {
-                  if (!userName || !userEmail) return;
-                  const roomLabel = selectedRoom?.replace("-", " ") ?? "(no room selected)";
-                  const styleLabel = styles.find((s) => s.id === selectedStyle)?.label ?? "(no style selected)";
-                  const budgetLabel = selectedBudget
-                    ? budgetRanges.find((b) => b.id === selectedBudget)?.label
-                    : "(no budget selected)";
-                  const areaLabel = squareMeters ? `${squareMeters} m²` : "(not provided)";
-                  const photoLabel =
-                    uploadedFiles.length > 0
-                      ? `${uploadedFiles.length} photo(s) selected (WebP downloads available in the wizard).`
-                      : "(no photos attached yet)";
+            {!isLoading && error && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {error}
+              </div>
+            )}
 
-                  const draft = `To: info@costadelsolservices.com, nicolas.cloet@gmail.com
+            {!isLoading && !error && images.length > 0 && (
+              <>
+                <div className="space-y-3 rounded-2xl border border-zinc-200 bg-white p-3 text-xs text-zinc-700">
+                  <div className="font-medium text-zinc-800">
+                    Step 2 of 2: Generate your email draft
+                  </div>
+                  <button
+                    type="button"
+                    disabled={!userName || !userEmail}
+                    onClick={() => {
+                      if (!userName || !userEmail) return;
+                      const roomLabel = selectedRoom?.replace("-", " ") ?? "(no room selected)";
+                      const styleLabel =
+                        styles.find((s) => s.id === selectedStyle)?.label ?? "(no style selected)";
+                      const budgetLabel = selectedBudget
+                        ? budgetRanges.find((b) => b.id === selectedBudget)?.label
+                        : "(no budget selected)";
+                      const areaLabel = computedAreaLabel || "(not provided)";
+                      const photoLabel =
+                        uploadedFiles.length > 0
+                          ? `${uploadedFiles.length} photo(s) selected (WebP downloads available in the wizard).`
+                          : "(no photos attached yet)";
+
+                      const draft = `To: info@costadelsolservices.com, nicolas.cloet@gmail.com
 From: ${userName} <${userEmail}>
 
 Subject: Renovation inquiry for ${roomLabel} in ${styleLabel}
@@ -673,32 +773,125 @@ Please let me know how we could proceed and what the next steps would be.
 Best regards,
 ${userName}`;
 
-                  setEmailDraft(draft);
-                }}
-                className="inline-flex w-full items-center justify-center rounded-2xl bg-black px-4 py-3 text-sm font-medium text-white shadow-sm transition enabled:hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300"
-              >
-                Generate email draft
-              </button>
+                      setEmailDraft(draft);
+                      setEmailStatus(null);
+                      setEmailCopyStatus(null);
+                    }}
+                    className="inline-flex items-center justify-center rounded-full bg-zinc-900 px-5 py-2 text-xs font-medium text-white shadow-sm transition enabled:hover:bg-black disabled:cursor-not-allowed disabled:bg-zinc-300"
+                  >
+                    Generate email draft
+                  </button>
 
-              {emailDraft && (
-                <div className="space-y-2 rounded-2xl border border-zinc-200 bg-white p-3">
-                  <div className="text-xs font-medium text-zinc-700">
-                    Step 1 of 2: Check if your information and this email look correct.
-                  </div>
-                  <textarea
-                    value={emailDraft}
-                    onChange={(e) => setEmailDraft(e.target.value)}
-                    rows={10}
-                    className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-xs font-mono outline-none focus:border-black focus:ring-1 focus:ring-black/60"
-                  />
-                  <p className="text-[11px] text-zinc-500">
-                    Copy this text into your email app and send it to{" "}
-                    <span className="font-medium">info@costadelsolservices.com</span> (you can keep
-                    nicolas.cloet@gmail.com in copy if you like).
-                  </p>
+                  {emailDraft && (
+                    <div className="space-y-2 rounded-2xl border border-zinc-200 bg-white p-3">
+                      <div className="text-xs font-medium text-zinc-700">
+                        Check if your information and this email look correct.
+                      </div>
+                      <textarea
+                        value={emailDraft}
+                        onChange={(e) => setEmailDraft(e.target.value)}
+                        rows={10}
+                        className="mt-1 w-full rounded-xl border border-zinc-200 px-3 py-2 text-xs font-mono outline-none focus:border-black focus:ring-1 focus:ring-black/60"
+                      />
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          disabled={emailSending}
+                          onClick={async () => {
+                            if (!emailDraft) return;
+                            try {
+                              setEmailSending(true);
+                              setEmailStatus(null);
+                              const res = await fetch("/api/send-email", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                  subject: "Renovation inquiry",
+                                  html: emailDraft.replace(/\n/g, "<br />"),
+                                }),
+                              });
+
+                              if (!res.ok) {
+                                const data = (await res.json().catch(() => ({}))) as {
+                                  error?: string;
+                                };
+                                setEmailStatus(data.error || "There was a problem sending the email.");
+                              } else {
+                                setEmailStatus("Email sent successfully.");
+                              }
+                            } catch (err) {
+                              console.error("Error calling /api/send-email", err);
+                              setEmailStatus("Unable to reach the email service. Please try again.");
+                            } finally {
+                              setEmailSending(false);
+                            }
+                          }}
+                          className="inline-flex items-center justify-center rounded-full bg-zinc-900 px-4 py-2 text-[11px] font-medium text-white shadow-sm transition enabled:hover:bg-black disabled:cursor-not-allowed disabled:bg-zinc-300"
+                        >
+                          {emailSending ? "Sending…" : "Send email via Resend"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(emailDraft);
+                              setEmailCopyStatus("Email copied to clipboard.");
+                            } catch {
+                              setEmailCopyStatus("Could not copy. Please copy manually.");
+                            }
+                          }}
+                          className="inline-flex items-center justify-center rounded-full border border-zinc-300 bg-white px-4 py-2 text-[11px] font-medium text-zinc-800 shadow-sm transition hover:border-zinc-400 hover:bg-zinc-50"
+                        >
+                          Copy email
+                        </button>
+                        <p className="text-[11px] text-zinc-500">
+                          Or copy this text into your email app and send it to{" "}
+                          <span className="font-medium">info@costadelsolservices.com</span> (you can keep
+                          nicolas.cloet@gmail.com in copy if you like).
+                        </p>
+                      </div>
+                      {emailStatus && (
+                        <p className="text-[11px] text-zinc-600">{emailStatus}</p>
+                      )}
+                      {emailCopyStatus && (
+                        <p className="text-[11px] text-zinc-600">{emailCopyStatus}</p>
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                  {images.map((src, index) => (
+                    <div
+                      key={src}
+                      className="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100"
+                    >
+                      <img
+                        src={src}
+                        alt={
+                          index === 0
+                            ? "AI generated floorplan suggestion with furniture layout"
+                            : "AI generated interior suggestion"
+                        }
+                        className="h-full w-full object-cover"
+                      />
+                      {index === 0 && (
+                        <div className="border-t border-zinc-200 bg-white p-2 text-[11px] text-zinc-600">
+                          Floorplan-style view to understand how furniture and measurements can fit in the
+                          space.
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {!isLoading && !error && images.length === 0 && (
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 text-xs text-zinc-600">
+                No images yet. Try going back, adjusting your choices, and continuing again.
+              </div>
+            )}
           </section>
         )}
 
