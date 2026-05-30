@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 This is a [Next.js](https://nextjs.org) app bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -55,3 +56,30 @@ The wizard calls a backend API to generate images based on the selected room and
   - If no usable images are returned, the route responds with `500` and `{ error: "Image generation returned no images" }` so the UI can show a clear error.
 
 Make sure your OpenAI account is active, billed, and allowed to use `gpt-image-1`, and that `OPENAI_API_KEY` in `.env.local` matches a key that can successfully call the Images API.
+=======
+# Renovation
+
+> Service Business project built with Static/Other
+
+## Tech Stack
+
+HTML/CSS
+
+## Getting Started
+
+```bash
+# Open index.html in browser
+# or use a local server:
+npx serve .
+```
+
+## Docker
+
+```bash
+docker-compose up --build
+```
+
+## License
+
+MIT
+>>>>>>> a830abc (chore: add project config (Prettier, Docker, CI/CD))
