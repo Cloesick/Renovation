@@ -10,7 +10,14 @@
     "stage": "git add .",
     "commit": "git commit -m",
     "deploy": "git push",
-    "convert:stock": "ts-node scripts/describe-and-convert-stock.ts"
+    "convert:stock": "ts-node scripts/describe-and-convert-stock.ts",
+    "test:learn": "cypress run",
+    "test:analyze": "node scripts/analyze-test-results.js",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:dashboard": "node scripts/analyze-test-results.js && start cypress/insights/report.html",
+    "test:insights": "node scripts/analyze-test-results.js"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
@@ -27,10 +34,16 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/sharp": "^0.31.1",
+    "cypress": "^15.14.2",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "cypress-multi-reporters": "^1.6.4",
+    "mocha-junit-reporter": "^2.2.1",
+    "mochawesome": "^7.1.3",
+    "mochawesome-merge": "^4.3.0",
+    "mochawesome-report-generator": "^6.2.0"
   }
 }
