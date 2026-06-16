@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: NextRequest) {
   try {
     const { subject, html, to } = (await req.json()) as {
@@ -17,6 +15,10 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Instantiate lazily (not at module load): the Resend constructor throws on a
+    // missing key, which otherwise crashes `next build` page-data collection.
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
    const toEnv = process.env.EMAIL_TO;
 if (!toEnv) {
