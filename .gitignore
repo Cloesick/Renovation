@@ -43,3 +43,29 @@ next-env.d.ts
 =======
 .env.local
 >>>>>>> a830abc (chore: add project config (Prettier, Docker, CI/CD))
+# --- secrets (claude 2026-09-23) ---
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+ENV_*.txt
+*.pem
+*.key
+*.p12
+service-account*.json
+
+# --- build output (claude 2026-09-23) ---
+node_modules/
+.next/
+.next-*/
+dist/
+out/
+coverage/
+.turbo/
+.venv/
+venv/
+__pycache__/
+*.log
+.DS_Store
+Thumbs.db
