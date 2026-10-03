@@ -1,9 +1,14 @@
-<<<<<<< HEAD
-This is a [Next.js](https://nextjs.org) app bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Renovation
+
+AI-assisted renovation quote wizard (service-business site). This is a [Next.js](https://nextjs.org) app bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
-From the `renovation-app` folder run the development server with **npm**:
+```bash
+npm install
+```
+
+From the repository root run the development server with **npm**:
 
 ```bash
 npm run dev
@@ -13,11 +18,14 @@ Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Environment variables
 
-Create a `.env.local` file in the `renovation-app` folder with your keys:
+Create a `.env.local` file in the repository root with your keys (never commit it):
 
 ```ini
 OPENAI_API_KEY=sk-...your-openai-key...
 GEMINI_API_KEY=...your-gemini-key...
+RESEND_API_KEY=...your-resend-key...   # used by /api/send-email
+EMAIL_FROM=...
+EMAIL_TO=...
 ```
 
 Restart the dev server after changing env variables.
@@ -56,30 +64,26 @@ The wizard calls a backend API to generate images based on the selected room and
   - If no usable images are returned, the route responds with `500` and `{ error: "Image generation returned no images" }` so the UI can show a clear error.
 
 Make sure your OpenAI account is active, billed, and allowed to use `gpt-image-1`, and that `OPENAI_API_KEY` in `.env.local` matches a key that can successfully call the Images API.
-=======
-# Renovation
 
-> Service Business project built with Static/Other
+## Repository layout: which app is deployed?
 
-## Tech Stack
+There are two app roots in this repo:
 
-HTML/CSS
+| Path | Status |
+|------|--------|
+| `app/` (repo root, root `package.json`) | **Deployed / canonical.** All recent work lives here: Next.js bumped to 16.0.10 because Vercel blocks the vulnerable 16.0.3 (`ab941c8`), lazy Resend init so `next build` works without the key (`0b70e66`), Linux-safe lockfile removal (`a04d1e1`), and the `/api/send-email` route. No `vercel.json`; the Vercel deploy fixes were all made to the root app, so Vercel builds from the repo root with Next.js auto-detected. |
+| `renovation-app/` | **Legacy snapshot, not deployed.** It is a separate nested git clone of this same GitHub repo frozen at `a95c7c3` (2026-05-26), recorded in the parent only as a gitlink (no `.gitmodules`). It still pins Next 16.0.3, which Vercel refuses. Kept for reference only; do not develop here. |
 
-## Getting Started
-
-```bash
-# Open index.html in browser
-# or use a local server:
-npx serve .
-```
+Tests: Cypress specs in `cypress/` (`run-all-tests.ps1` runs the full set).
 
 ## Docker
 
+The bundled `Dockerfile` / `docker-compose.yml` are a generic nginx static-file template and do **not** run the Next.js app (API routes need a Node runtime). For a container build of the real app use `next build && next start` on a Node 20 image instead.
+
 ```bash
-docker-compose up --build
+docker-compose up --build   # static nginx template, port 8080
 ```
 
 ## License
 
 MIT
->>>>>>> a830abc (chore: add project config (Prettier, Docker, CI/CD))
